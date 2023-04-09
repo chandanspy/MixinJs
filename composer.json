@@ -1,0 +1,22 @@
+{
+    "name": "echidna/mixinjss",
+    "type": "library",
+    "require": {
+        "spryker/twig": "^3.18",
+        "spryker/twig-extension": "^1.1",
+        "php": "^8.0"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Echidna\\Mixinjss\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "chandanspy",
+            "email": "chandan.k@echidnainc.com"
+        }
+    ],
+    "minimum-stability": "beta"
+}
