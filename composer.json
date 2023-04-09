@@ -1,5 +1,5 @@
 {
-    "name": "echidna/mixinjss",
+    "name": "echidna/mixinjs",
     "type": "library",
     "require": {
         "spryker/twig": "^3.18",
