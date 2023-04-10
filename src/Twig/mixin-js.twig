@@ -1,3 +1,87 @@
-{% block testt %}
-<h1>hello-hiii</h1>
-{% endblock %}
+   {% block customjs %}
+        <div class="container" id="mixinJs">
+            <!-- dynamic Content Placeholder -->
+        </div>
+        {% if _view.mixinData is defined %}
+            {% define viewObj=_view.mixinData %}
+            {% define callType=viewObj.configType['ajax'] %}
+            {% define positionConfig=viewObj['positionConfig'] %}
+            {% define extraJsDependency=viewObj.extraJsDependency %}
+            {% define mixinDataObj={
+                'url':callType['url'],
+                'callMethod':callType['type'],
+                'extraRequestData':callType['extraAttributes'],
+                'positionConfigMoveType':positionConfig['moveType'],
+                'positionConfigMoveTypeIdentifier':positionConfig['moveTypeIdentifier'],
+                'jsLibrary':viewObj.jsLib | default('jQuery')
+            } %}
+            {% if mixinDataObj.jsLibrary == 'jQuery' or mixinDataObj.jsLibrary == 'jquery' %}
+                <script>
+                    (function () {
+                        let startingTime = new Date().getTime();
+                        // Load the script
+                        let script = document.createElement("SCRIPT");//create script element
+                        script.src = 'https://code.jquery.com/jquery-3.6.4.min.js';
+                        script.type = 'text/javascript';
+                        //just to confirm that the jquery is loaded or not,logging time in the console
+                        script.onload = function () {
+                            let $ = window.jQuery;
+                            $(function () {
+                                    let endingTime = new Date().getTime();
+                                    let tookTime = endingTime - startingTime;
+                                    console.log("jQuery lib loaded successfully, after " + tookTime + " milliseconds!");
+                                    {% if mixinDataObj.url !='' and mixinDataObj.callMethod !='' %}
+                                    let extraDataJson = JSON.stringify({{ mixinDataObj.extraRequestData | json_encode | raw }});
+                                    let requestType = '{{ mixinDataObj.callMethod }}';
+                                    let url = '{{ mixinDataObj.url }}';
+
+                                    function executeAjaxRequest(requestType, url, extraDataJson) {
+                                        if (requestType === 'GET' || requestType === 'get') {
+                                            $.get(url, function (response) {
+                                                // Handle successful response
+                                                $("#mixinJs").html(JSON.stringify(response));
+                                                console.log(response);
+                                            }).fail(function (error) {
+                                                // Handle error
+                                                console.error(error);
+                                            });
+                                        } else {
+                                            $.post(url, extraDataJson, function (data) {
+                                                $("#mixinJs").html(response);
+                                                console.log('Success!', data);
+                                            }).fail(function () {
+                                                console.log('Error!');
+                                            });
+                                        }
+                                    }
+
+                                    executeAjaxRequest(requestType, url, extraDataJson);
+                                    let positionConfigMoveType = '{{ mixinDataObj.positionConfigMoveType }}';
+                                    let positionConfigMoveTypeIdentifier = '{{ mixinDataObj.positionConfigMoveTypeIdentifier }}'
+
+
+                                    $(document).ready(function () {
+                                        if (positionConfigMoveType !== '' && positionConfigMoveTypeIdentifier !== '') {
+                                            setTimeout(function () {
+                                                let responseHtmlData = $("#mixinJs").html();
+                                                $("<div class='container'>" + responseHtmlData + "</div>").{{ mixinDataObj.positionConfigMoveType }}('{{ mixinDataObj.positionConfigMoveTypeIdentifier }}');
+                                                $("#mixinJs").hide();
+                                            }, 3000)
+                                        }
+                                    })
+                                    {% endif %}
+                                }
+                            );
+                        };
+                        document.getElementsByTagName("head")[0].appendChild(script);
+                    })
+                    ();
+                </script>
+            {% else %}
+                <script>
+                    alert('{{ mixinDataObj.jsLibrary }}');
+                </script>
+            {% endif %}
+        {% endif %}
+
+    {% endblock %}
